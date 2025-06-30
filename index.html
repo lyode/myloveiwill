@@ -1,861 +1,842 @@
-import React, { useState } from 'react';
-import { Users, Home, Heart, Edit3, Trash2, Download, AlertCircle, Check, ArrowLeft, Plus } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>My Love & I Will</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const WillBeneficiaryApp = () => {
-  const [activeTab, setActiveTab] = useState('home');
-  const [activeAssetCategory, setActiveAssetCategory] = useState('');
-  
-  const [personalInfo, setPersonalInfo] = useState({
-    fullName: '',
-    dateOfBirth: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    phone: '',
-    email: ''
-  });
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fbb6ce, #c084fc, #818cf8);
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overflow-x: hidden;
+        }
 
-  const [beneficiaries, setBeneficiaries] = useState([]);
-  const [assets, setAssets] = useState({
-    properties: [],
-    land: [],
-    cars: [],
-    shares: [],
-    cash: [],
-    goldSilver: [],
-    diamonds: [],
-    pearls: [],
-    jewelry: [],
-    art: [],
-    electronics: [],
-    furniture: [],
-    collectibles: [],
-    other: []
-  });
-  
-  const [executors, setExecutors] = useState([]);
-  const [specialInstructions, setSpecialInstructions] = useState('');
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [userPin, setUserPin] = useState('');
-  const [savedPin, setSavedPin] = useState('1234');
-  const [showPinSetup, setShowPinSetup] = useState(false);
-  const [tempPin, setTempPin] = useState('');
-  const [confirmPin, setConfirmPin] = useState('');
-  const [pinError, setPinError] = useState('');
+        .container {
+            max-width: 428px;
+            margin: 0 auto;
+            padding: 16px;
+            min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        }
 
-  const [showBeneficiaryForm, setShowBeneficiaryForm] = useState(false);
-  const [showAssetForm, setShowAssetForm] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(-1);
+        /* Header */
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
 
-  const [newBeneficiary, setNewBeneficiary] = useState({
-    name: '',
-    relationship: '',
-    dateOfBirth: '',
-    address: '',
-    phone: '',
-    email: '',
-    percentage: 0,
-    lawyerCertified: false,
-    certificationDate: '',
-    lawyerName: ''
-  });
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 8px;
+        }
 
-  const [newAsset, setNewAsset] = useState({
-    name: '',
-    description: '',
-    value: '',
-    location: '',
-    beneficiary: '',
-    notes: '',
-    lawyerCertified: false,
-    certificationDate: '',
-    lawyerName: ''
-  });
+        .header p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
 
-  const assetCategories = {
-    properties: { title: 'My House', icon: '🏠', description: 'Real estate properties' },
-    land: { title: 'My Territory', icon: '🌍', description: 'Land and territories' },
-    cars: { title: 'My Ferrari', icon: '🏎️', description: 'Vehicles and transportation' },
-    shares: { title: 'Toilet Paper', icon: '🧻', description: 'Stocks and shares' },
-    cash: { title: 'Cigar', icon: '🚬', description: 'Cash and currency' },
-    goldSilver: { title: 'Screw Driver', icon: '🔧', description: 'Precious metals' },
-    diamonds: { title: 'Diamonds', icon: '💎', description: 'Diamond collection' },
-    pearls: { title: 'Stones', icon: '🪨', description: 'Pearls and precious stones' },
-    jewelry: { title: 'My Jewels', icon: '💍', description: 'Jewelry collection' },
-    art: { title: 'My Masterpieces', icon: '🎨', description: 'Art and collectibles' },
-    electronics: { title: 'My Gadgets', icon: '📱', description: 'Electronics and devices' },
-    furniture: { title: 'My Comfort', icon: '🛋️', description: 'Furniture and home items' },
-    collectibles: { title: 'My Treasures', icon: '🏆', description: 'Collectibles and memorabilia' },
-    other: { title: 'Other Valuables', icon: '💼', description: 'Other valuable items' }
-  };
+        /* Card styles */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
 
-  const handlePinEntry = () => {
-    if (userPin === savedPin) {
-      setIsUnlocked(true);
-      setUserPin('');
-      setPinError('');
-    } else {
-      setPinError('Incorrect PIN. Please try again.');
-      setUserPin('');
-    }
-  };
+        /* Home page grid */
+        .home-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
 
-  const handlePinSetup = () => {
-    if (tempPin.length < 4) {
-      setPinError('PIN must be at least 4 digits');
-      return;
-    }
-    if (tempPin !== confirmPin) {
-      setPinError('PINs do not match');
-      return;
-    }
-    setSavedPin(tempPin);
-    setShowPinSetup(false);
-    setTempPin('');
-    setConfirmPin('');
-    setPinError('');
-    alert('PIN updated successfully!');
-  };
+        .home-button {
+            background: linear-gradient(135deg, #ec4899, #f97316);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
 
-  const lockPersonalInfo = () => {
-    setIsUnlocked(false);
-    setUserPin('');
-    setPinError('');
-  };
+        .home-button:nth-child(1) { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .home-button:nth-child(2) { background: linear-gradient(135deg, #8b5cf6, #5b21b6); }
+        .home-button:nth-child(3) { background: linear-gradient(135deg, #10b981, #059669); }
+        .home-button:nth-child(4) { background: linear-gradient(135deg, #3b82f6, #1e40af); }
+        .home-button:nth-child(5) { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .home-button:nth-child(6) { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
-  const addBeneficiary = () => {
-    if (editingIndex >= 0) {
-      const updated = [...beneficiaries];
-      updated[editingIndex] = newBeneficiary;
-      setBeneficiaries(updated);
-      setEditingIndex(-1);
-    } else {
-      setBeneficiaries([...beneficiaries, { ...newBeneficiary, id: Date.now() }]);
-    }
-    setNewBeneficiary({
-      name: '',
-      relationship: '',
-      dateOfBirth: '',
-      address: '',
-      phone: '',
-      email: '',
-      percentage: 0,
-      lawyerCertified: false,
-      certificationDate: '',
-      lawyerName: ''
-    });
-    setShowBeneficiaryForm(false);
-  };
+        .home-button:active {
+            transform: scale(0.98);
+        }
 
-  const addAsset = () => {
-    const category = activeAssetCategory;
-    if (editingIndex >= 0) {
-      const updated = [...assets[category]];
-      updated[editingIndex] = newAsset;
-      setAssets({...assets, [category]: updated});
-      setEditingIndex(-1);
-    } else {
-      setAssets({
-        ...assets,
-        [category]: [...assets[category], { ...newAsset, id: Date.now() }]
-      });
-    }
-    setNewAsset({
-      name: '',
-      description: '',
-      value: '',
-      location: '',
-      beneficiary: '',
-      notes: '',
-      lawyerCertified: false,
-      certificationDate: '',
-      lawyerName: ''
-    });
-    setShowAssetForm(false);
-  };
+        .home-button .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
 
-  const deleteBeneficiary = (index) => {
-    setBeneficiaries(beneficiaries.filter((_, i) => i !== index));
-  };
+        .home-button h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
 
-  const deleteAsset = (category, index) => {
-    setAssets({
-      ...assets,
-      [category]: assets[category].filter((_, i) => i !== index)
-    });
-  };
+        .home-button p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
 
-  const editBeneficiary = (index) => {
-    setNewBeneficiary(beneficiaries[index]);
-    setEditingIndex(index);
-    setShowBeneficiaryForm(true);
-  };
+        /* Navigation */
+        .nav-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
 
-  const editAsset = (category, index) => {
-    setNewAsset(assets[category][index]);
-    setEditingIndex(index);
-    setActiveAssetCategory(category);
-    setShowAssetForm(true);
-  };
+        .back-btn {
+            background: #e5e7eb;
+            border: none;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 16px;
+            transition: all 0.2s ease;
+        }
 
-  const totalPercentage = beneficiaries.reduce((sum, b) => sum + Number(b.percentage || 0), 0);
+        .back-btn:active {
+            background: #d1d5db;
+            transform: scale(0.95);
+        }
 
-  const generateWill = () => {
-    const allAssets = Object.entries(assets).flatMap(([category, items]) => 
-      items.map(item => ({...item, category: assetCategories[category].title}))
-    );
+        .nav-title {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            flex-grow: 1;
+        }
 
-    const willContent = `LAST WILL AND TESTAMENT
+        /* Form elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
 
-I, ${personalInfo.fullName}, of ${personalInfo.address}, ${personalInfo.city}, ${personalInfo.state} ${personalInfo.zipCode}, being of sound mind and memory, do hereby make, publish, and declare this to be my Last Will and Testament.
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
 
-PERSONAL INFORMATION:
-Full Name: ${personalInfo.fullName}
-Date of Birth: ${personalInfo.dateOfBirth}
-Address: ${personalInfo.address}, ${personalInfo.city}, ${personalInfo.state} ${personalInfo.zipCode}
-Phone: ${personalInfo.phone}
-Email: ${personalInfo.email}
+        .form-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
 
-BENEFICIARIES:
-${beneficiaries.map((beneficiary, i) => `Beneficiary ${i + 1}:
-Name: ${beneficiary.name}
-Relationship: ${beneficiary.relationship}
-Percentage of Estate: ${beneficiary.percentage}%
-Address: ${beneficiary.address}
-Phone: ${beneficiary.phone}
-Email: ${beneficiary.email}
-Lawyer Certified: ${beneficiary.lawyerCertified ? 'Yes' : 'No'}${beneficiary.lawyerCertified ? `
-Certifying Lawyer: ${beneficiary.lawyerName || 'Not specified'}
-Certification Date: ${beneficiary.certificationDate || 'Not specified'}` : ''}`).join('\n\n')}
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 12px;
+        }
 
-MY VALUABLE POSSESSIONS:
-${allAssets.map((asset, i) => `${asset.category} ${i + 1}:
-Name: ${asset.name}
-Description: ${asset.description}
-Estimated Value: ${asset.value}
-Location: ${asset.location}
-Designated Beneficiary: ${asset.beneficiary}
-Notes: ${asset.notes}
-Lawyer Certified: ${asset.lawyerCertified ? 'Yes' : 'No'}${asset.lawyerCertified ? `
-Certifying Lawyer: ${asset.lawyerName || 'Not specified'}
-Certification Date: ${asset.certificationDate || 'Not specified'}` : ''}`).join('\n\n')}
+        .btn:active {
+            transform: scale(0.98);
+        }
 
-SPECIAL INSTRUCTIONS:
-${specialInstructions}
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
 
-This will was created on ${new Date().toLocaleDateString()}.
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+            display: inline-block;
+            margin: 4px;
+        }
+
+        /* Lock screen */
+        .lock-screen {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .lock-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+        }
+
+        .lock-screen h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 16px;
+        }
+
+        .lock-screen p {
+            color: #6b7280;
+            margin-bottom: 32px;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            font-size: 24px;
+            font-family: monospace;
+            text-align: center;
+            letter-spacing: 8px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .pin-help {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 16px;
+        }
+
+        /* Asset categories */
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .category-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(247, 250, 252, 0.9));
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .category-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .category-desc {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* Asset items */
+        .asset-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(239, 246, 255, 0.95));
+            border: 2px solid #dbeafe;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .asset-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .certified-badge {
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .asset-desc {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .asset-value {
+            color: #10b981;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .asset-location {
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .asset-beneficiary {
+            color: #3b82f6;
+            font-size: 12px;
+        }
+
+        /* Hidden sections */
+        .hidden {
+            display: none;
+        }
+
+        /* Error messages */
+        .error {
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        /* Success messages */
+        .success {
+            color: #059669;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        /* Loading states */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments for iPhone Pro Max */
+        @media (min-width: 428px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .home-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            .home-button {
+                padding: 28px 20px;
+            }
+        }
+
+        /* Landscape mode adjustments */
+        @media (orientation: landscape) {
+            .home-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .card {
+                background: rgba(31, 41, 55, 0.95);
+                color: white;
+            }
+            
+            .nav-title {
+                color: white;
+            }
+            
+            .form-input {
+                background: rgba(55, 65, 81, 0.8);
+                color: white;
+                border-color: #4b5563;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>My Love & I Will</h1>
+            <p>Planning my legacy with love and care</p>
+        </div>
+
+        <!-- Home Page -->
+        <div id="home-page">
+            <div class="card">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <div style="font-size: 64px; margin-bottom: 16px;">💝</div>
+                    <h2 style="font-size: 28px; font-weight: 800; color: #374151; margin-bottom: 16px; background: linear-gradient(135deg, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome to Your Legacy</h2>
+                    <p style="color: #6b7280;">Create your will with love and organize everything that matters</p>
+                </div>
+
+                <div class="home-grid">
+                    <button class="home-button" onclick="showPage('about-me')">
+                        <span class="icon">👤</span>
+                        <h3>About Me</h3>
+                        <p>My personal information</p>
+                    </button>
+
+                    <button class="home-button" onclick="showPage('my-things')">
+                        <span class="icon">💎</span>
+                        <h3>My Things</h3>
+                        <p>All my valuable possessions</p>
+                    </button>
+
+                    <button class="home-button" onclick="showPage('loved-ones')">
+                        <span class="icon">❤️</span>
+                        <h3>My Loved Ones</h3>
+                        <p>People I care about</p>
+                    </button>
+
+                    <button class="home-button" onclick="showPage('executors')">
+                        <span class="icon">⚖️</span>
+                        <h3>Executors</h3>
+                        <p>Who will handle my affairs</p>
+                    </button>
+
+                    <button class="home-button" onclick="showPage('wishes')">
+                        <span class="icon">📝</span>
+                        <h3>My Wishes</h3>
+                        <p>Special instructions & desires</p>
+                    </button>
+
+                    <button class="home-button" onclick="showPage('review')">
+                        <span class="icon">📋</span>
+                        <h3>Review & Create</h3>
+                        <p>Generate my will document</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Me Page -->
+        <div id="about-me-page" class="hidden">
+            <div class="card">
+                <div class="nav-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <span>←</span>
+                    </button>
+                    <h2 class="nav-title">About Me</h2>
+                    <button class="btn-small btn-secondary" onclick="togglePinSetup()">
+                        ⚙️ Setup PIN
+                    </button>
+                </div>
+
+                <div id="pin-setup" class="hidden">
+                    <div style="background: linear-gradient(135deg, #fef3c7, #fed7aa); border: 2px solid #fbbf24; border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 16px;">🔐 Setup New PIN</h3>
+                        <div class="form-group">
+                            <input type="password" class="form-input" placeholder="Enter new PIN (min 4 digits)" id="new-pin" maxlength="8">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-input" placeholder="Confirm new PIN" id="confirm-pin" maxlength="8">
+                        </div>
+                        <div id="pin-error" class="error hidden"></div>
+                        <button class="btn" onclick="savePin()">Save PIN</button>
+                        <button class="btn btn-secondary" onclick="togglePinSetup()">Cancel</button>
+                    </div>
+                </div>
+
+                <div id="lock-screen">
+                    <div class="lock-screen">
+                        <div class="lock-icon">🔐</div>
+                        <h3>Personal Information Locked</h3>
+                        <p>Enter your PIN to access personal details</p>
+                        <input type="password" class="pin-input" placeholder="Enter PIN" id="pin-input" maxlength="8">
+                        <div id="pin-error-display" class="error hidden"></div>
+                        <button class="btn" onclick="unlockInfo()">🔓 Unlock</button>
+                        <div class="pin-help">
+                            <p>Default PIN: 1234</p>
+                            <p>Use "Setup PIN" to change it</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="personal-form" class="hidden">
+                    <div style="text-align: right; margin-bottom: 20px;">
+                        <button class="btn-small btn-danger" onclick="lockInfo()">
+                            🔒 Lock Info
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="Full Legal Name" id="full-name">
+                    </div>
+                    <div class="form-group">
+                        <input type="date" class="form-input" placeholder="Date of Birth" id="date-birth">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="Street Address" id="address">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="City" id="city">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="State" id="state">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="ZIP Code" id="zip">
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" class="form-input" placeholder="Phone Number" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-input" placeholder="Email Address" id="email">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Things Page -->
+        <div id="my-things-page" class="hidden">
+            <div class="card">
+                <div class="nav-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <span>←</span>
+                    </button>
+                    <h2 class="nav-title">My Things</h2>
+                </div>
+
+                <div class="category-grid" id="categories-list">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Page -->
+        <div id="review-page" class="hidden">
+            <div class="card">
+                <div class="nav-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <span>←</span>
+                    </button>
+                    <h2 class="nav-title">Review & Create My Will</h2>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(243, 244, 246, 0.9)); border: 2px solid #e5e7eb; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
+                        <h3 style="font-weight: 700; margin-bottom: 12px; display: flex; align-items: center;">
+                            👤 About Me
+                            <span id="lock-status" style="margin-left: auto; background: linear-gradient(135deg, #ef4444, #ec4899); color: white; font-size: 12px; padding: 4px 8px; border-radius: 8px;">🔐 Locked</span>
+                        </h3>
+                        <div id="personal-summary">
+                            <p style="color: #6b7280; font-size: 14px;">Personal information locked - PIN required</p>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(239, 246, 255, 0.9)); border: 2px solid #dbeafe; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
+                        <h3 style="font-weight: 700; margin-bottom: 12px;">❤️ My Loved Ones (0)</h3>
+                        <p style="color: #6b7280; font-size: 14px;">No beneficiaries added yet</p>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 253, 244, 0.9)); border: 2px solid #bbf7d0; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+                        <h3 style="font-weight: 700; margin-bottom: 12px;">💎 My Things</h3>
+                        <div id="things-summary">
+                            <p style="color: #6b7280; font-size: 14px;">No items added yet</p>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="generateWill()">
+                        📄 Generate My Will Document
+                    </button>
+
+                    <div style="background: linear-gradient(135deg, #fef3c7, #fed7aa); border: 2px solid #fbbf24; color: #92400e; border-radius: 16px; padding: 16px; margin-top: 16px;">
+                        <p style="font-weight: 700; font-size: 14px;">Important Legal Notice:</p>
+                        <p style="font-size: 12px;">This tool generates a basic will template for informational purposes only. Please consult with a qualified attorney to ensure your will meets all legal requirements in your jurisdiction and properly reflects your wishes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let isUnlocked = false;
+        let currentPin = '1234';
+        let personalInfo = {};
+        let currentPage = 'home';
+
+        // Asset categories
+        const assetCategories = {
+            properties: { title: 'My House', icon: '🏠', description: 'Real estate properties' },
+            land: { title: 'My Territory', icon: '🌍', description: 'Land and territories' },
+            cars: { title: 'My Ferrari', icon: '🏎️', description: 'Vehicles and transportation' },
+            shares: { title: 'Toilet Paper', icon: '🧻', description: 'Stocks and shares' },
+            cash: { title: 'Cigar', icon: '🚬', description: 'Cash and currency' },
+            goldSilver: { title: 'Screw Driver', icon: '🔧', description: 'Precious metals' },
+            diamonds: { title: 'Diamonds', icon: '💎', description: 'Diamond collection' },
+            pearls: { title: 'Stones', icon: '🪨', description: 'Pearls and precious stones' },
+            jewelry: { title: 'My Jewels', icon: '💍', description: 'Jewelry collection' },
+            art: { title: 'My Masterpieces', icon: '🎨', description: 'Art and collectibles' },
+            electronics: { title: 'My Gadgets', icon: '📱', description: 'Electronics and devices' },
+            furniture: { title: 'My Comfort', icon: '🛋️', description: 'Furniture and home items' },
+            collectibles: { title: 'My Treasures', icon: '🏆', description: 'Collectibles and memorabilia' },
+            other: { title: 'Other Valuables', icon: '💼', description: 'Other valuable items' }
+        };
+
+        // Navigation functions
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = ['home', 'about-me', 'my-things', 'loved-ones', 'executors', 'wishes', 'review'];
+            pages.forEach(page => {
+                const element = document.getElementById(page + '-page');
+                if (element) {
+                    element.classList.add('hidden');
+                }
+            });
+
+            // Show selected page
+            const targetPage = document.getElementById(pageId + '-page');
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                currentPage = pageId;
+            }
+
+            // Initialize page content
+            if (pageId === 'my-things') {
+                loadCategories();
+            }
+        }
+
+        // PIN management
+        function togglePinSetup() {
+            const pinSetup = document.getElementById('pin-setup');
+            pinSetup.classList.toggle('hidden');
+        }
+
+        function savePin() {
+            const newPin = document.getElementById('new-pin').value;
+            const confirmPin = document.getElementById('confirm-pin').value;
+            const errorDiv = document.getElementById('pin-error');
+
+            if (newPin.length < 4) {
+                showError('pin-error', 'PIN must be at least 4 digits');
+                return;
+            }
+
+            if (newPin !== confirmPin) {
+                showError('pin-error', 'PINs do not match');
+                return;
+            }
+
+            currentPin = newPin;
+            document.getElementById('new-pin').value = '';
+            document.getElementById('confirm-pin').value = '';
+            errorDiv.classList.add('hidden');
+            togglePinSetup();
+            
+            // Show success message
+            alert('PIN updated successfully!');
+        }
+
+        function unlockInfo() {
+            const enteredPin = document.getElementById('pin-input').value;
+            const errorDiv = document.getElementById('pin-error-display');
+
+            if (enteredPin === currentPin) {
+                isUnlocked = true;
+                document.getElementById('lock-screen').classList.add('hidden');
+                document.getElementById('personal-form').classList.remove('hidden');
+                document.getElementById('pin-input').value = '';
+                errorDiv.classList.add('hidden');
+                updateLockStatus();
+            } else {
+                showError('pin-error-display', 'Incorrect PIN. Please try again.');
+                document.getElementById('pin-input').value = '';
+            }
+        }
+
+        function lockInfo() {
+            isUnlocked = false;
+            document.getElementById('lock-screen').classList.remove('hidden');
+            document.getElementById('personal-form').classList.add('hidden');
+            updateLockStatus();
+        }
+
+        function updateLockStatus() {
+            const lockStatus = document.getElementById('lock-status');
+            const personalSummary = document.getElementById('personal-summary');
+            
+            if (isUnlocked) {
+                lockStatus.innerHTML = '🔓 Unlocked';
+                lockStatus.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                const name = document.getElementById('full-name')?.value || 'Not specified';
+                const address = document.getElementById('address')?.value || '';
+                const city = document.getElementById('city')?.value || '';
+                const state = document.getElementById('state')?.value || '';
+                const zip = document.getElementById('zip')?.value || '';
+                
+                personalSummary.innerHTML = `
+                    <p style="color: #374151; font-size: 14px;">${name}</p>
+                    ${address ? `<p style="color: #6b7280; font-size: 12px;">${address}, ${city}, ${state} ${zip}</p>` : ''}
+                `;
+            } else {
+                lockStatus.innerHTML = '🔐 Locked';
+                lockStatus.style.background = 'linear-gradient(135deg, #ef4444, #ec4899)';
+                personalSummary.innerHTML = '<p style="color: #6b7280; font-size: 14px;">Personal information locked - PIN required</p>';
+            }
+        }
+
+        // Categories management
+        function loadCategories() {
+            const categoriesList = document.getElementById('categories-list');
+            categoriesList.innerHTML = '';
+
+            Object.entries(assetCategories).forEach(([key, category]) => {
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'category-card';
+                categoryCard.onclick = () => openCategory(key);
+                
+                categoryCard.innerHTML = `
+                    <span class="category-icon">${category.icon}</span>
+                    <h3 class="category-title">${category.title}</h3>
+                    <p class="category-desc">${category.description}</p>
+                    <p class="category-count">0 items</p>
+                `;
+                
+                categoriesList.appendChild(categoryCard);
+            });
+        }
+
+        function openCategory(categoryKey) {
+            const category = assetCategories[categoryKey];
+            alert(`Opening ${category.title} - Feature coming soon!`);
+        }
+
+        // Utility functions
+        function showError(elementId, message) {
+            const errorDiv = document.getElementById(elementId);
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function generateWill() {
+            const name = document.getElementById('full-name')?.value || 'Not specified';
+            
+            const willContent = `LAST WILL AND TESTAMENT
+
+I, ${name}, being of sound mind and memory, do hereby make, publish, and declare this to be my Last Will and Testament.
+
+This will was created on ${new Date().toLocaleDateString()} using the "My Love & I Will" app.
 
 Note: This document is for informational purposes only and should be reviewed by a qualified attorney before execution.`;
 
-    const blob = new Blob([willContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${personalInfo.fullName || 'MyLoveWill'}_${new Date().toISOString().split('T')[0]}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+            // Create and download file
+            const blob = new Blob([willContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name || 'MyLoveWill'}_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-400">
-      <div className="max-w-md mx-auto p-3 sm:max-w-6xl sm:p-6">
-        <div className="mb-4 text-center bg-white/20 backdrop-blur-sm rounded-xl p-4 shadow-lg sm:mb-8 sm:p-6">
-          <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg sm:text-4xl">My Love & I Will</h1>
-          <p className="text-white/90 text-sm drop-shadow sm:text-lg">Planning my legacy with love and care</p>
-        </div>
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up PIN input to only accept numbers
+            const pinInputs = document.querySelectorAll('#pin-input, #new-pin, #confirm-pin');
+            pinInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
+                });
+            });
 
-        {/* Home Page */}
-        {activeTab === 'home' && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 sm:p-8">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">💝</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Welcome to Your Legacy</h2>
-              <p className="text-gray-600">Create your will with love and organize everything that matters</p>
-            </div>
+            // Enable Enter key for PIN entry
+            document.getElementById('pin-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    unlockInfo();
+                }
+            });
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <button
-                onClick={() => setActiveTab('aboutme')}
-                className="bg-gradient-to-r from-pink-400 to-rose-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              >
-                <div className="text-4xl mb-3">👤</div>
-                <h3 className="text-lg font-bold mb-2">About Me</h3>
-                <p className="text-sm opacity-90">My personal information</p>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('mythings')}
-                className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              >
-                <div className="text-4xl mb-3">💎</div>
-                <h3 className="text-lg font-bold mb-2">My Things</h3>
-                <p className="text-sm opacity-90">All my valuable possessions</p>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('beneficiaries')}
-                className="bg-gradient-to-r from-green-400 to-emerald-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              >
-                <div className="text-4xl mb-3">❤️</div>
-                <h3 className="text-lg font-bold mb-2">My Loved Ones</h3>
-                <p className="text-sm opacity-90">People I care about</p>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('executors')}
-                className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              >
-                <div className="text-4xl mb-3">⚖️</div>
-                <h3 className="text-lg font-bold mb-2">Executors</h3>
-                <p className="text-sm opacity-90">Who will handle my affairs</p>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('instructions')}
-                className="bg-gradient-to-r from-orange-400 to-red-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              >
-                <div className="text-4xl mb-3">📝</div>
-                <h3 className="text-lg font-bold mb-2">My Wishes</h3>
-                <p className="text-sm opacity-90">Special instructions & desires</p>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('review')}
-                className="bg-gradient-to-r from-violet-400 to-purple-500 text-white p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              >
-                <div className="text-4xl mb-3">📋</div>
-                <h3 className="text-lg font-bold mb-2">Review & Create</h3>
-                <p className="text-sm opacity-90">Generate my will document</p>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* About Me Page */}
-        {activeTab === 'aboutme' && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20 sm:p-8">
-            <div className="flex items-center mb-6">
-              <button
-                onClick={() => setActiveTab('home')}
-                className="mr-4 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <h2 className="text-xl font-bold text-gray-800 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent sm:text-3xl">About Me</h2>
-              <button
-                onClick={() => setShowPinSetup(!showPinSetup)}
-                className="ml-auto flex items-center space-x-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-xl hover:from-gray-600 hover:to-gray-700 transform hover:scale-105 transition-all shadow-lg text-sm"
-              >
-                <span>⚙️</span>
-                <span>Setup PIN</span>
-              </button>
-            </div>
-            
-            {showPinSetup && (
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border-2 border-yellow-300 mb-4 shadow-lg">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                  <span className="mr-2">🔐</span>
-                  Setup New PIN
-                </h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <input
-                    type="password"
-                    placeholder="Enter new PIN (min 4 digits)"
-                    value={tempPin}
-                    onChange={(e) => setTempPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                    className="p-3 border-2 border-yellow-300 rounded-xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                    maxLength="8"
-                  />
-                  <input
-                    type="password"
-                    placeholder="Confirm new PIN"
-                    value={confirmPin}
-                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                    className="p-3 border-2 border-yellow-300 rounded-xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                    maxLength="8"
-                  />
-                </div>
-                {pinError && (
-                  <p className="text-red-600 text-sm mt-2 font-medium">{pinError}</p>
-                )}
-                <div className="flex flex-col space-y-2 mt-3 sm:flex-row sm:space-y-0 sm:space-x-2">
-                  <button
-                    onClick={handlePinSetup}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all shadow-lg font-semibold text-sm sm:text-base"
-                  >
-                    Save PIN
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowPinSetup(false);
-                      setTempPin('');
-                      setConfirmPin('');
-                      setPinError('');
-                    }}
-                    className="bg-gradient-to-r from-gray-400 to-gray-600 text-white px-4 py-2 rounded-xl hover:from-gray-500 hover:to-gray-700 transform hover:scale-105 transition-all shadow-lg font-semibold text-sm sm:text-base"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {!isUnlocked ? (
-              <div className="text-center py-12">
-                <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-8 border-2 border-blue-300 max-w-md mx-auto">
-                  <div className="text-6xl mb-4">🔐</div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Personal Information Locked</h3>
-                  <p className="text-gray-600 text-sm mb-6">Enter your PIN to access personal details</p>
-                  
-                  <div className="space-y-4">
-                    <input
-                      type="password"
-                      placeholder="Enter PIN"
-                      value={userPin}
-                      onChange={(e) => setUserPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                      onKeyPress={(e) => e.key === 'Enter' && handlePinEntry()}
-                      className="w-full p-4 border-2 border-blue-300 rounded-xl focus:ring-4 focus:ring-blue-400 focus:border-blue-500 bg-white/70 backdrop-blur-sm transition-all text-center text-lg font-mono tracking-widest"
-                      maxLength="8"
-                      autoFocus
-                    />
-                    
-                    {pinError && (
-                      <p className="text-red-600 text-sm font-medium">{pinError}</p>
-                    )}
-                    
-                    <button
-                      onClick={handlePinEntry}
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all shadow-lg font-semibold"
-                    >
-                      🔓 Unlock
-                    </button>
-                    
-                    <div className="text-xs text-gray-500 mt-4">
-                      <p>Default PIN: 1234</p>
-                      <p>Use "Setup PIN" to change it</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex justify-end mb-4">
-                  <button
-                    onClick={lockPersonalInfo}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-2 rounded-xl hover:from-red-600 hover:to-pink-700 transform hover:scale-105 transition-all shadow-lg text-sm"
-                  >
-                    <span>🔒</span>
-                    <span>Lock Info</span>
-                  </button>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                  <input
-                    type="text"
-                    placeholder="Full Legal Name"
-                    value={personalInfo.fullName}
-                    onChange={(e) => setPersonalInfo({...personalInfo, fullName: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                  <input
-                    type="date"
-                    placeholder="Date of Birth"
-                    value={personalInfo.dateOfBirth}
-                    onChange={(e) => setPersonalInfo({...personalInfo, dateOfBirth: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Street Address"
-                    value={personalInfo.address}
-                    onChange={(e) => setPersonalInfo({...personalInfo, address: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="City"
-                    value={personalInfo.city}
-                    onChange={(e) => setPersonalInfo({...personalInfo, city: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="State"
-                    value={personalInfo.state}
-                    onChange={(e) => setPersonalInfo({...personalInfo, state: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="ZIP Code"
-                    value={personalInfo.zipCode}
-                    onChange={(e) => setPersonalInfo({...personalInfo, zipCode: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={personalInfo.phone}
-                    onChange={(e) => setPersonalInfo({...personalInfo, phone: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={personalInfo.email}
-                    onChange={(e) => setPersonalInfo({...personalInfo, email: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all hover:bg-white/70 text-sm sm:p-4 sm:text-base"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* My Things Page */}
-        {activeTab === 'mythings' && !activeAssetCategory && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20 sm:p-8">
-            <div className="flex items-center mb-6">
-              <button
-                onClick={() => setActiveTab('home')}
-                className="mr-4 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <h2 className="text-xl font-bold text-gray-800 bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent sm:text-3xl">My Things</h2>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Object.entries(assetCategories).map(([key, category]) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveAssetCategory(key)}
-                  className="bg-gradient-to-r from-white to-purple-50 p-6 rounded-2xl border-2 border-purple-200 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all text-left"
-                >
-                  <div className="text-4xl mb-3">{category.icon}</div>
-                  <h3 className="text-lg font-bold mb-2 text-gray-800">{category.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{category.description}</p>
-                  <p className="text-xs text-blue-600 font-medium">
-                    {assets[key].length} items
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Individual Asset Category Page */}
-        {activeTab === 'mythings' && activeAssetCategory && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20 sm:p-8">
-            <div className="flex items-center mb-6">
-              <button
-                onClick={() => setActiveAssetCategory('')}
-                className="mr-4 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <div className="flex items-center">
-                <span className="text-3xl mr-3">{assetCategories[activeAssetCategory].icon}</span>
-                <h2 className="text-xl font-bold text-gray-800 bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent sm:text-3xl">
-                  {assetCategories[activeAssetCategory].title}
-                </h2>
-              </div>
-              <button
-                onClick={() => setShowAssetForm(true)}
-                className="ml-auto flex items-center space-x-2 bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-xl hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all shadow-lg text-sm"
-              >
-                <Plus size={16} />
-                <span>Add Item</span>
-              </button>
-            </div>
-
-            {showAssetForm && (
-              <div className="bg-gradient-to-r from-white to-purple-50 p-4 rounded-xl border-2 border-purple-200 mb-6 shadow-lg">
-                <h3 className="text-lg font-semibold mb-3">{editingIndex >= 0 ? 'Edit' : 'Add'} {assetCategories[activeAssetCategory].title}</h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <input
-                    type="text"
-                    placeholder="Item Name"
-                    value={newAsset.name}
-                    onChange={(e) => setNewAsset({...newAsset, name: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={newAsset.description}
-                    onChange={(e) => setNewAsset({...newAsset, description: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Estimated Value ($)"
-                    value={newAsset.value}
-                    onChange={(e) => setNewAsset({...newAsset, value: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Location"
-                    value={newAsset.location}
-                    onChange={(e) => setNewAsset({...newAsset, location: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                  />
-                  <select
-                    value={newAsset.beneficiary}
-                    onChange={(e) => setNewAsset({...newAsset, beneficiary: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                  >
-                    <option value="">Select Beneficiary (Optional)</option>
-                    {beneficiaries.map((beneficiary, index) => (
-                      <option key={index} value={beneficiary.name}>{beneficiary.name}</option>
-                    ))}
-                  </select>
-                  <textarea
-                    placeholder="Additional Notes"
-                    value={newAsset.notes}
-                    onChange={(e) => setNewAsset({...newAsset, notes: e.target.value})}
-                    className="p-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base sm:col-span-2"
-                    rows="3"
-                  />
-                </div>
-                
-                {/* Lawyer Certification Section for Assets */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 mt-4">
-                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <span className="mr-2">⚖️</span>
-                    Asset Certification
-                  </h4>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <label className="flex items-center space-x-2 p-2 bg-white/50 rounded-lg">
-                      <input
-                        type="checkbox"
-                        checked={newAsset.lawyerCertified}
-                        onChange={(e) => setNewAsset({...newAsset, lawyerCertified: e.target.checked})}
-                        className="rounded text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm font-medium sm:text-base">Lawyer Certified</span>
-                    </label>
-                    
-                    {newAsset.lawyerCertified && (
-                      <>
-                        <input
-                          type="text"
-                          placeholder="Certifying Lawyer Name"
-                          value={newAsset.lawyerName}
-                          onChange={(e) => setNewAsset({...newAsset, lawyerName: e.target.value})}
-                          className="p-3 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 focus:border-blue-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                        />
-                        <input
-                          type="date"
-                          placeholder="Certification Date"
-                          value={newAsset.certificationDate}
-                          onChange={(e) => setNewAsset({...newAsset, certificationDate: e.target.value})}
-                          className="p-3 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 focus:border-blue-400 bg-white/70 backdrop-blur-sm transition-all text-sm sm:text-base"
-                        />
-                      </>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex flex-col space-y-2 mt-3 sm:flex-row sm:space-y-0 sm:space-x-2">
-                  <button
-                    onClick={addAsset}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all shadow-lg font-semibold text-sm sm:text-base"
-                  >
-                    {editingIndex >= 0 ? 'Update' : 'Add'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowAssetForm(false);
-                      setEditingIndex(-1);
-                      setNewAsset({
-                        name: '',
-                        description: '',
-                        value: '',
-                        location: '',
-                        beneficiary: '',
-                        notes: '',
-                        lawyerCertified: false,
-                        certificationDate: '',
-                        lawyerName: ''
-                      });
-                    }}
-                    className="bg-gradient-to-r from-gray-400 to-gray-600 text-white px-4 py-2 rounded-xl hover:from-gray-500 hover:to-gray-700 transform hover:scale-105 transition-all shadow-lg font-semibold text-sm sm:text-base"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              {assets[activeAssetCategory].map((asset, index) => (
-                <div key={asset.id || index} className="bg-gradient-to-r from-white to-blue-50 p-4 rounded-xl border-2 border-blue-200 shadow-lg hover:shadow-xl transition-all">
-                  <div className="flex flex-col space-y-3 sm:flex-row sm:justify-between sm:items-start sm:space-y-0">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-gray-800 flex items-center">
-                        {asset.name}
-                        {asset.lawyerCertified && (
-                          <span className="ml-2 bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
-                            ⚖️ Certified
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-gray-600 text-sm">{asset.description}</p>
-                      <p className="text-green-600 font-semibold">${Number(asset.value).toLocaleString()}</p>
-                      <p className="text-xs text-gray-500">📍 {asset.location}</p>
-                      {asset.beneficiary && (
-                        <p className="text-xs text-blue-600">→ {asset.beneficiary}</p>
-                      )}
-                      {asset.notes && (
-                        <p className="text-xs text-gray-600 italic mt-1">"{asset.notes}"</p>
-                      )}
-                      {asset.lawyerCertified && (
-                        <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
-                          <p className="text-xs text-green-700 font-medium">
-                            ⚖️ Certified by: {asset.lawyerName || 'Not specified'}
-                          </p>
-                          <p className="text-xs text-green-600">
-                            Date: {asset.certificationDate || 'Not specified'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex space-x-2 justify-end">
-                      <button
-                        onClick={() => editAsset(activeAssetCategory, index)}
-                        className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-100 rounded-lg transition-all"
-                      >
-                        <Edit3 size={16} />
-                      </button>
-                      <button
-                        onClick={() => deleteAsset(activeAssetCategory, index)}
-                        className="text-red-500 hover:text-red-700 p-2 hover:bg-red-100 rounded-lg transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              {assets[activeAssetCategory].length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">{assetCategories[activeAssetCategory].icon}</div>
-                  <h3 className="text-lg font-semibold text-gray-600 mb-2">No {assetCategories[activeAssetCategory].title} Yet</h3>
-                  <p className="text-gray-500">Click "Add Item" to start adding your valuable possessions</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Review Page */}
-        {activeTab === 'review' && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20 sm:p-8">
-            <div className="flex items-center mb-6">
-              <button
-                onClick={() => setActiveTab('home')}
-                className="mr-4 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <h2 className="text-xl font-bold text-gray-800 bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent sm:text-3xl">Review & Create My Will</h2>
-            </div>
-
-            <div className="space-y-6">
-              <div className="bg-gradient-to-r from-white to-purple-50 p-4 rounded-xl border-2 border-purple-200 shadow-lg">
-                <h3 className="font-bold text-lg mb-2 text-gray-800 flex items-center">
-                  👤 About Me
-                  {isUnlocked ? (
-                    <button
-                      onClick={lockPersonalInfo}
-                      className="ml-auto bg-gradient-to-r from-red-400 to-pink-500 text-white px-3 py-1 rounded-lg text-xs hover:from-red-500 hover:to-pink-600 transition-all flex items-center space-x-1"
-                    >
-                      <span>🔒</span>
-                      <span>Lock</span>
-                    </button>
-                  ) : (
-                    <span className="ml-auto bg-gradient-to-r from-red-400 to-pink-500 text-white px-3 py-1 rounded-lg text-xs flex items-center space-x-1">
-                      <span>🔐</span>
-                      <span>Locked</span>
-                    </span>
-                  )}
-                </h3>
-                {isUnlocked ? (
-                  <div>
-                    <p className="text-gray-700 text-sm">{personalInfo.fullName || 'Not specified'}</p>
-                    <p className="text-gray-600 text-xs">{personalInfo.address && `${personalInfo.address}, ${personalInfo.city}, ${personalInfo.state} ${personalInfo.zipCode}`}</p>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-xs">Personal information locked - PIN required</p>
-                )}
-              </div>
-
-              <div className="bg-gradient-to-r from-white to-blue-50 p-4 rounded-xl border-2 border-blue-200 shadow-lg">
-                <h3 className="font-bold text-lg mb-2 text-gray-800 flex items-center">
-                  ❤️ My Loved Ones ({beneficiaries.length})
-                  <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                    {beneficiaries.filter(b => b.lawyerCertified).length} Certified
-                  </span>
-                </h3>
-                {beneficiaries.map((beneficiary, index) => (
-                  <div key={index} className="mb-1">
-                    <p className="text-gray-700 text-sm flex items-center">
-                      {beneficiary.name} - {beneficiary.percentage}%
-                      {beneficiary.lawyerCertified && (
-                        <span className="ml-2 text-green-600 text-xs">⚖️</span>
-                      )}
-                    </p>
-                  </div>
-                ))}
-                {totalPercentage !== 100 && beneficiaries.length > 0 && (
-                  <p className="text-yellow-600 font-semibold text-sm">Warning: Total percentage is {totalPercentage}%, not 100%</p>
-                )}
-              </div>
-
-              <div className="bg-gradient-to-r from-white to-green-50 p-4 rounded-xl border-2 border-green-200 shadow-lg">
-                <h3 className="font-bold text-lg mb-2 text-gray-800 flex items-center">
-                  💎 My Things
-                  <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                    {Object.values(assets).flat().filter(item => item.lawyerCertified).length} Certified
-                  </span>
-                </h3>
-                {Object.entries(assets).map(([category, items]) => (
-                  items.length > 0 && (
-                    <div key={category} className="mb-2">
-                      <p className="text-gray-700 text-sm flex items-center">
-                        <span className="mr-2">{assetCategories[category].icon}</span>
-                        {assetCategories[category].title}: {items.length} items
-                        <span className="ml-2 text-green-600 text-xs">
-                          ({items.filter(item => item.lawyerCertified).length} ⚖️)
-                        </span>
-                      </p>
-                    </div>
-                  )
-                ))}
-              </div>
-
-              <button
-                onClick={generateWill}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all shadow-lg flex items-center justify-center space-x-3 font-bold text-lg"
-              >
-                <Download size={24} />
-                <span>Generate My Will Document</span>
-              </button>
-
-              <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-400 text-yellow-800 px-4 py-3 rounded-xl shadow-lg">
-                <p className="font-bold text-sm">Important Legal Notice:</p>
-                <p className="text-xs">This tool generates a basic will template for informational purposes only. Please consult with a qualified attorney to ensure your will meets all legal requirements in your jurisdiction and properly reflects your wishes.</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default WillBeneficiaryApp;
+            // Initialize lock status
+            updateLockStatus();
+        });
+    </script>
+</body>
+</html>
